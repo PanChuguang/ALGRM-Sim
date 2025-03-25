@@ -57,8 +57,8 @@ function [nextq,nextqdot,nextqddot] = oneStepRK4Int(qn,qdn,n,dt,fcnsCell)
         Ydot(1:numq) = qdot;
 
         LHS = [M(q) Phi2q(q,t).';Phi2q(q,t) zeros(numc)];
-        RHS = [Q(q,qdot,t);-Phi2qqd2q(q,qdot,t)*qdot-2*Phi2qt(q,t)*qdot-Phi2tt(t)-...
-            2*20*(Phi2t(t)+Phi2q(q,t)*qdot)-20^2*Phi(q,t)];
+        RHS = [Q(q,qdot,t);-Phi2qqd2q(q,qdot,t)*qdot-2*Phi2qt(q,t)*qdot-Phi2tt(q,t)-...
+            2*20*(Phi2t(q,t)+Phi2q(q,t)*qdot)-20^2*Phi(q,t)];
         accLamda = LHS\RHS;
         Ydot(numq+1:end) = accLamda(1:numq);
     end
