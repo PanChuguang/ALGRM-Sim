@@ -11,13 +11,15 @@ function params = paramsInit()
     dyn.g = 9.8; % gravity constant [unit]
 
     kine = struct; % kinematic parameters struct
-    kine.H = [1.6,0.4,1.495,0.605,0.3,0.6];
-    kine.Ls2 = 0.35;
-    kine.Ls4 = 0.54;
-    kine.Ls31 = 0.514;
-    kine.Ls32 = 0.723;
-    kine.Ls33 = 0.490;
-    kine.alpha = deg2rad([16.31,24.48,52.05,15.85,22.55]);
+    kine.H = [1.6,0.4,1.495,0.605,0.3,0.6]; % [1.6 0.4 1.495 0.605 0.3 0.6]
+    kine.Ls2 = 0.35; % 0.35
+    kine.Ls4 = 0.54; % 0.54
+    kine.Ls31 = 0.514; % 0.514
+    kine.Ls32 = 0.723; % 0.723
+    kine.Ls33 = 0.490; % 0.490
+    kine.alpha = deg2rad([16.31,24.48,52.05,15.85,22.55]); % [16.31 24.48 ...
+                                                           % 52.05 15.85 22.55]
+                                                                            
 
     % parameters of clearance joint A and joint B
 
