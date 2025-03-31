@@ -18,6 +18,7 @@ function [nextq,nextqdot,nextqddot] = oneStepRK4Int(qn,qdn,n,dt,fcnsCell)
     %
     
     % unpack function handles of DAEs from input argument fcnsCell.
+    assert(numel(fcnsCell)==8,"number of function handle must be 8.");
     M = fcnsCell{1};
     Phi = fcnsCell{2};
     Phi2q = fcnsCell{3};
