@@ -1,4 +1,4 @@
-function F = getContactForce(disBR,qB,dqB,eBJ,deBJ,predeldot,Rj,K,ce,muf,nu0,nu1)
+function [F,locB,locP,Fn] = getContactForce(disBR,qB,dqB,eBJ,deBJ,qJ,predeldot,Rj,K,ce,muf,nu0,nu1)
     % calculation of contact force between bearing and journal with 
     % action point at contact point
     %
@@ -16,6 +16,9 @@ function F = getContactForce(disBR,qB,dqB,eBJ,deBJ,predeldot,Rj,K,ce,muf,nu0,nu1
     %   nu0 -- friction tolerance lower bound
     %   nu1 -- friction tolerance upper bound
     % Output arguments:
+    %   F -- contact force vector from journal to bearing
+    %   locB -- localized contact point coordinates of bearing 
+    %   locP -- localized contact point coordinates of journal
     %   Fn -- magnitude of normal contact force
 
     arguments (Input)
@@ -24,6 +27,7 @@ function F = getContactForce(disBR,qB,dqB,eBJ,deBJ,predeldot,Rj,K,ce,muf,nu0,nu1
         dqB (4,1) double {mustBeFinite,mustBeNonNan}
         eBJ (2,1) double {mustBeFinite,mustBeNonNan}
         deBJ (2,1) double {mustBeFile,mustBeNonNan}
+        qJ (4,1) double {mustBeFinite,mustBeNonNan}
         predeldot (1,1) double {mustBeFinite,mustBeNonNan}
         Rj (1,1) double {mustBePositive,mustBeFinite,mustBeNonNan}
         K (1,1) double {mustBePositive,mustBeNonNan}
@@ -35,10 +39,20 @@ function F = getContactForce(disBR,qB,dqB,eBJ,deBJ,predeldot,Rj,K,ce,muf,nu0,nu1
 
     arguments (Output)
         F (2,1) double {mustBeFinite,mustBeNonNan}
+        locB (2,1) double {mustBeFinite,mustBeNonNan}
+        locP (2,1) double {mustBeFinite,mustBeNonNan}
+        Fn  (1,1) double {mustBeNonnegative,mustBeFinite}
     end
 
     % get contact point
-    [deltaS,betaS,~,~,~] = getContactRegion(disBR,qB,eBJ,Rj);
+    [deltaS,betaS,~,~,locB,locP,~] = getContactRegion(disBR,qB,qJ,eBJ,Rj);
+
+    if any(isnan([deltaS,betaS,locB,locP]))
+        [F,locB,locP] = deal(zeros(2,1));
+        Fn = 0;
+        return;
+    end
+
     N = numel(disBR);
     angles = 0:2*pi/N:2*pi-2*pi/N;
     Rb = @(x) spline([angles;2*pi],[0;disBR;disBR(1);0],mod(x,2*pi));
@@ -60,5 +74,6 @@ function F = getContactForce(disBR,qB,dqB,eBJ,deBJ,predeldot,Rj,K,ce,muf,nu0,nu1
     Ft = muf*Fn*min(1,max(0,(abs(vt)-nu0)./(nu1-nu0)))*sign(vt);
 
     F = Fn*normvec + Ft*tangvec;
+
 
 end

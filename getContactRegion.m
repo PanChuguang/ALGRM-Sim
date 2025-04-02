@@ -1,22 +1,26 @@
-function  [delta_c,beta_c,beta_s,beta_f,isContact] = getContactRegion(disBR,qB,eBJ,Rj)
+function  [delta_c,beta_c,beta_s,beta_f,loc_B,loc_P,isContact] = getContactRegion(disBR,qB,qJ,eBJ,Rj)
     % function for obtaining contact region on nonuniform bearing contour
     % 
     % Input arguments:
     %   disBR -> discrete radius of bearing contour
     %   qB -> generalized coordinates of bearing body
+    %   qJ -> generalized coordinates of journal body
     %   eBJ -> eccentricity vector from bearing to journal (GCS)
     %   Rj -> constant radius of journal
     %
     % Output arguments:
     %   delta_c -> penetration depth in contact angle \beta_c
     %   beta_c -> contact angle of contact point
-    %   beta_s -> start angle of contact region
-    %   beta_f -> end angle of contact region (beta_s < beta_f)
+    %   beta_s -> entry angle of contact region
+    %   beta_f -> exit angle of contact region Note: beta_s may be > beta_f
+    %   loc_B -> local coordinates of the contact point on the bearing
+    %   loc_P -> local coordinates of the contact point on the journal
     %   isContatc -> contact flag
 
     arguments (Input)
         disBR (:,1) double {mustBeFinite,mustBeNonNan}
         qB (4,1) double {mustBeFinite,mustBeNonNan}
+        qJ (4,1) double {mustBeFinite,mustBeNonNan}
         eBJ (2,1) double {mustBeFinite,mustBeNonNan} 
         Rj (1,1) double {mustBeFinite,mustBeNonNan,mustBePositive}
     end
@@ -24,8 +28,10 @@ function  [delta_c,beta_c,beta_s,beta_f,isContact] = getContactRegion(disBR,qB,e
     arguments (Output)
         delta_c (1,1) double {mustBeFinite,mustBeNonNan}
         beta_c  (1,1) double {mustBeFinite,mustBeNonNan}
-        beta_s  (1,1) double {mustBeFinite,mustBeNonNan}
-        beta_f  (1,1) double {mustBeFinite,mustBeNonNan}
+        beta_s  (1,1) double {mustBePositive,mustBeFinite}
+        beta_f  (1,1) double {mustBePositive,mustBeFinite}
+        loc_B  (2,1) double {mustBeFinite,mustBeNonNan}
+        loc_P  (2,1) double {mustBeFinite,mustBeNonNan}
         isContact  logical {mustBeScalarOrEmpty,mustBeNonempty}
     end
     
@@ -53,6 +59,8 @@ function  [delta_c,beta_c,beta_s,beta_f,isContact] = getContactRegion(disBR,qB,e
         beta_c = nan;
         beta_s = nan;
         beta_f = nan;
+        loc_B = nan;
+        loc_P = nan;
         return;
     end
 
@@ -84,5 +92,9 @@ function  [delta_c,beta_c,beta_s,beta_f,isContact] = getContactRegion(disBR,qB,e
     beta_c = trapz(intSamples,intSamples.*intTargets)./trapz(intSamples,intTargets);
     beta_c = mod(beta_c,2*pi); % unwrap angle to [0,2*pi]
     delta_c = penDepth(beta_c);
+
+    loc_B = Rb(beta_c)*[cos(beta_c);sin(beta_c)];
+    loc_P = [dot(dB(beta_c),normalize(qJ(3:4),"norm"));...
+            dot(dB(beta_c),[0 -1;1 0]*normalize(qJ(3:4),"norm"))];
 
 end

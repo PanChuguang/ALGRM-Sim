@@ -1,12 +1,14 @@
-function newDisBR = wearCalculation(oldDisBR,qBnext,qBcur,eBJnext,eBJcur,Fn,Lc,Rj,Kw)
+function newDisBR = wearCalculation(oldDisBR,qBnext,qBcur,eBJnext,eBJcur,qJcur,qJnext,Fn,Lc,Rj,Kw)
     % function for calculation of wearing effect between [t_{n},t_{n+1}]
     %
     % Input arguments:
     %   oldDisBR -- discrete radius of bearing contour before wearing
-    %   qBnext -- generalzied coordinates of bearing body in time step n+1
-    %   qBcur -- generalized coordinates of bearing body in time step n
+    %   qBnext -- generalzied coordinates of bearing body at time step n+1
+    %   qBcur -- generalized coordinates of bearing body at time step n
     %   eRJnext -- eccentricity vector from bearing to journal (GCS) n+1
     %   eRJcur -- eccentricity vector from bearing to journal (GCS) n
+    %   qJcur -- generalized coordinates of journal body at time step n
+    %   qJnext -- generalized coordinates of journal body at time step n+1
     %   Fn -- normal contact force in current time step n
     %   Lc -- journal contact length
     %   Rj -- constant radius of journal
@@ -21,6 +23,8 @@ function newDisBR = wearCalculation(oldDisBR,qBnext,qBcur,eBJnext,eBJcur,Fn,Lc,R
         qBcur (4,1) double {mustBeFinite,mustBeNonNan}
         eBJnext (2,1) double {mustBeFinite,mustBeNonNan}
         eBJcur (2,1) double {mustBeFinite,mustBeNonNan}
+        qJcur (4,1) double {mustBeFinite,mustBeNonNan}
+        qJnext (4,1) double {mustBeFinite,mustBeNonNan}
         Fn (1,1) double {mustBePositive,mustBeNonNan,mustBeNonNan}
         Lc (1,1) double {mustBePositive,mustBeNonNan,mustBeFinite}
         Rj (1,1) double {mustBePositive,mustBeNonNan,mustBeFinite}
@@ -33,7 +37,7 @@ function newDisBR = wearCalculation(oldDisBR,qBnext,qBcur,eBJnext,eBJcur,Fn,Lc,R
 
     % contact pressure calculation of contacted points
     % obtain contact points firstly
-    [~,beta_s,beta_a,beta_b,~] = getContactRegion(oldDisBR,qBcur,eBJcur,Rj);
+    [~,beta_s,beta_a,beta_b,~,~,~] = getContactRegion(oldDisBR,qBcur,qJcur,eBJcur,Rj);
 
     % get max contact pressure p_max
     %
@@ -50,8 +54,8 @@ function newDisBR = wearCalculation(oldDisBR,qBnext,qBcur,eBJnext,eBJcur,Fn,Lc,R
     pmax = 4.*Fn./((arcA + arcB)*pi*Lc);
     
     % obatin slip distance from the current time step n
-    [~,beta_s_new,~,~,~] = getContactRegion(oldDisBR,qBnext,eBJnext,Rj);
-    deltaS = abs(diff(unwrap([beta_s beta_s_new])))*Rb(beta_s_new); 
+    [~,beta_s_new,~,~,~,~,~] = getContactRegion(oldDisBR,qBnext,qJnext,eBJnext,Rj);
+    deltaS = abs(diff(unwrap([beta_s beta_s_new])))*Rb(beta_s_new); % slip distance
    
     % contact points wear calculation
     newDisBR = oldDisBR; % preallocation output variable
