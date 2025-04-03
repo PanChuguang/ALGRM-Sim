@@ -26,12 +26,12 @@ function  [delta_c,beta_c,beta_s,beta_f,loc_B,loc_P,isContact] = getContactRegio
     end
 
     arguments (Output)
-        delta_c (1,1) double {mustBeFinite,mustBeNonNan}
-        beta_c  (1,1) double {mustBeFinite,mustBeNonNan}
-        beta_s  (1,1) double {mustBePositive,mustBeFinite}
-        beta_f  (1,1) double {mustBePositive,mustBeFinite}
-        loc_B  (2,1) double {mustBeFinite,mustBeNonNan}
-        loc_P  (2,1) double {mustBeFinite,mustBeNonNan}
+        delta_c (1,1) double {mustBeNonempty}
+        beta_c  (1,1) double {mustBeNonempty}
+        beta_s  (1,1) double {mustBeNonempty}
+        beta_f  (1,1) double {mustBeNonempty}
+        loc_B  (2,1) double {mustBeNonempty}
+        loc_P  (2,1) double {mustBeNonempty}
         isContact  logical {mustBeScalarOrEmpty,mustBeNonempty}
     end
     
@@ -41,7 +41,7 @@ function  [delta_c,beta_c,beta_s,beta_f,loc_B,loc_P,isContact] = getContactRegio
     Rb = @(ang) spline([betas;2*pi],[0;disBR;disBR(1);0],mod(ang,2*pi));
 
   
-    sB = @(ang) consTranMat2D(Rb(ang).*[cos(ang);sin(ang)],"vector")*qB;
+    sB = @(ang) consTranMat2D(Rb(ang)*[cos(ang);sin(ang)],"vector")*qB;
     dB = @(ang) sB(ang) - eBJ;
     penDepth = @(ang) Rj - vecnorm(dB(ang));
     
@@ -59,8 +59,8 @@ function  [delta_c,beta_c,beta_s,beta_f,loc_B,loc_P,isContact] = getContactRegio
         beta_c = nan;
         beta_s = nan;
         beta_f = nan;
-        loc_B = nan;
-        loc_P = nan;
+        loc_B = nan(2,1);
+        loc_P = nan(2,1);
         return;
     end
 
@@ -82,14 +82,16 @@ function  [delta_c,beta_c,beta_s,beta_f,loc_B,loc_P,isContact] = getContactRegio
 
     % calculation of contact angle \beta_c
     unwrapRange = unwrap([beta_s;beta_f]);
-    intSamples = linspace(unwrapRange(1),unwrapRange(2)); 
-
-    intTargets = zeros(numel(intSamples),1);
-    for sampleIdx = 1:numel(intTargets)
-        intTargets(sampleIdx) = penDepth(intSamples(sampleIdx));
-    end
+    % intSamples = linspace(unwrapRange(1),unwrapRange(2)); 
+    % 
+    % intTargets = zeros(numel(intSamples),1);
+    % for sampleIdx = 1:numel(intTargets)
+    %     intTargets(sampleIdx) = penDepth(intSamples(sampleIdx));
+    % end
     
-    beta_c = trapz(intSamples,intSamples.*intTargets)./trapz(intSamples,intTargets);
+    % beta_c = trapz(intSamples,intSamples.*intTargets)./trapz(intSamples,intTargets);
+    beta_c = integral(@(x) x*penDepth(x),unwrapRange(1),unwrapRange(2))./...
+             integral(penDepth,unwrapRange(1),unwrapRange(2));
     beta_c = mod(beta_c,2*pi); % unwrap angle to [0,2*pi]
     delta_c = penDepth(beta_c);
 

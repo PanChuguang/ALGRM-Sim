@@ -46,10 +46,12 @@ function newDisBR = wearCalculation(oldDisBR,qBnext,qBcur,eBJnext,eBJcur,qJcur,q
     Rb = @(x) spline([betas;2*pi],[0;oldDisBR;oldDisBR(1);0],mod(x,2*pi));
     segARange = unwrap([beta_a beta_s]);
     segBRange = unwrap([beta_s beta_b]);
-    segASamples = linspace(segARange(1),segARange(2),50);
-    segBSamples = linspace(segBRange(1),segBRange(2),50);
-    arcA = trapz(segASamples,Rb(segASamples));
-    arcB = trapz(segBSamples,Rb(segBSamples));
+    % segASamples = linspace(segARange(1),segARange(2),50);
+    % segBSamples = linspace(segBRange(1),segBRange(2),50);
+    % arcA = trapz(segASamples,Rb(segASamples));
+    % arcB = trapz(segBSamples,Rb(segBSamples));
+    arcA = integral(Rb,segARange(1),segARange(2));
+    arcB = integral(Rb,segBRange(1),segBRange(2));
 
     pmax = 4.*Fn./((arcA + arcB)*pi*Lc);
     

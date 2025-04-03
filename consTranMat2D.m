@@ -12,20 +12,31 @@ function C = consTranMat2D(locPV,type)
     %                         coordinates
 
     arguments (Input)
-        locPV (2,1) {mustBeNumeric}
+        locPV (2,:) {mustBeNumeric}
         type {mustBeMember(type,["point","vector"])}="point"
     end
     
     arguments (Output)
-        C (2,4) {mustBeNumeric}
+        C (2,4,:) {mustBeNumeric}
     end
+    
+    % batch points processing
+    B = size(locPV,2); % batches of points
+    C = zeros(2,4,B); % preallocation
+
+    xPos = reshape(locPV(1,:),1,1,B);
+    yPos = reshape(locPV(2,:),1,1,B);
 
     if type=="point"
-        C=[1 0 locPV(1) -locPV(2);0 1 locPV(2) locPV(1)];
+        % C=[1 0 locPV(1) -locPV(2);0 1 locPV(2) locPV(1)];
+
+        C = [repmat(eye(2),1,1,B),[xPos,-yPos;yPos,xPos]];
     end
 
     if type=="vector"
-        C=[0 0 locPV(1) -locPV(2);0 0 locPV(2) locPV(1)];
+        % C=[0 0 locPV(1) -locPV(2);0 0 locPV(2) locPV(1)];
+        
+        C = [repmat(zeros(2),1,1,B),[xPos,-yPos;yPos,xPos]];
     end
 
 end
