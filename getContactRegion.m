@@ -41,18 +41,20 @@ function  [delta_c,beta_c,beta_s,beta_f,loc_B,loc_P,isContact] = getContactRegio
     Rb = @(ang) spline([betas;2*pi],[0;disBR;disBR(1);0],mod(ang,2*pi));
 
   
-    sB = @(ang) consTranMat2D(Rb(ang)*[cos(ang);sin(ang)],"vector")*qB;
+    sB = @(ang) squeeze(pagemtimes(consTranMat2D(Rb(ang).*[cos(ang);sin(ang)],"vector"),qB)); 
     dB = @(ang) sB(ang) - eBJ;
     penDepth = @(ang) Rj - vecnorm(dB(ang));
     
     % Contact condition determine
-    isContact = false;
-    for idx = 1:N
-        if penDepth(betas(idx)) > 0
-            isContact = true;
-            break;
-        end
-    end
+
+     isContact = any(penDepth(betas.')>0);
+     
+    % for idx = 1:N
+    %     if penDepth(betas(idx)) > 0
+    %         isContact = true;
+    %         break;
+    %     end
+    % end
     
     if ~isContact
         delta_c = nan;
@@ -90,7 +92,7 @@ function  [delta_c,beta_c,beta_s,beta_f,loc_B,loc_P,isContact] = getContactRegio
     % end
     
     % beta_c = trapz(intSamples,intSamples.*intTargets)./trapz(intSamples,intTargets);
-    beta_c = integral(@(x) x*penDepth(x),unwrapRange(1),unwrapRange(2))./...
+    beta_c = integral(@(x) x.*penDepth(x),unwrapRange(1),unwrapRange(2))./...
              integral(penDepth,unwrapRange(1),unwrapRange(2));
     beta_c = mod(beta_c,2*pi); % unwrap angle to [0,2*pi]
     delta_c = penDepth(beta_c);

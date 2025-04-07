@@ -43,7 +43,7 @@ function newDisBR = wearCalculation(oldDisBR,qBnext,qBcur,eBJnext,eBJcur,qJcur,q
     %
     N = numel(oldDisBR); % number of discrete points along the bearing contour
     betas = 0:2*pi/N:2*pi-2*pi/N;
-    Rb = @(x) spline([betas;2*pi],[0;oldDisBR;oldDisBR(1);0],mod(x,2*pi));
+    Rb = @(x) spline([betas,2*pi],[0;oldDisBR;oldDisBR(1);0],mod(x,2*pi));
     segARange = unwrap([beta_a beta_s]);
     segBRange = unwrap([beta_s beta_b]);
     % segASamples = linspace(segARange(1),segARange(2),50);

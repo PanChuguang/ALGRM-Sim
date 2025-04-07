@@ -26,7 +26,7 @@ function [F,locB,locP,Fn] = getContactForce(disBR,qB,dqB,eBJ,deBJ,qJ,predeldot,R
         qB (4,1) double {mustBeFinite,mustBeNonNan}
         dqB (4,1) double {mustBeFinite,mustBeNonNan}
         eBJ (2,1) double {mustBeFinite,mustBeNonNan}
-        deBJ (2,1) double {mustBeFile,mustBeNonNan}
+        deBJ (2,1) double {mustBeFinite,mustBeNonNan}
         qJ (4,1) double {mustBeFinite,mustBeNonNan}
         predeldot (1,1) double {mustBeFinite,mustBeNonNan}
         Rj (1,1) double {mustBePositive,mustBeFinite,mustBeNonNan}
@@ -47,7 +47,7 @@ function [F,locB,locP,Fn] = getContactForce(disBR,qB,dqB,eBJ,deBJ,qJ,predeldot,R
     % get contact point
     [deltaS,betaS,~,~,locB,locP,~] = getContactRegion(disBR,qB,qJ,eBJ,Rj);
 
-    if any(isnan([deltaS,betaS,locB,locP]))
+    if isnan(deltaS)
         [F,locB,locP] = deal(zeros(2,1));
         Fn = 0;
         return;
@@ -55,7 +55,7 @@ function [F,locB,locP,Fn] = getContactForce(disBR,qB,dqB,eBJ,deBJ,qJ,predeldot,R
 
     N = numel(disBR);
     angles = 0:2*pi/N:2*pi-2*pi/N;
-    Rb = @(x) spline([angles;2*pi],[0;disBR;disBR(1);0],mod(x,2*pi));
+    Rb = @(x) spline([angles,2*pi],[0;disBR;disBR(1);0],mod(x,2*pi));
     dvec = consTranMat2D(Rb(betaS).*[cos(betaS);sin(betaS)],"vector")*qB - eBJ;
     dvecdot = consTranMat2D(Rb(betaS).*[cos(betaS);sin(betaS)],"vector")*dqB - deBJ;
 

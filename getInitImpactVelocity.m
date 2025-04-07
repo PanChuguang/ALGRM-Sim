@@ -25,7 +25,7 @@ function preDeltaDot = getInitImpactVelocity(disBR,betaS,qB,dqB,eBJ,deBJ)
     % obtain bearing contour from disBR
     N = numel(disBR);
     betas = 0:2*pi/N:2*pi-2*pi/N;
-    Rb = @(x) spline([betas;2*pi],[0;disBR;disBR(1);0],mod(x,2*pi));
+    Rb = @(x) spline([betas,2*pi],[0;disBR;disBR(1);0],mod(x,2*pi));
 
     vecDB = consTranMat2D(Rb(betaS).*[cos(betaS);sin(betaS)],"vector")*qB - eBJ;
     vecDBdot = consTranMat2D(Rb(betaS).*[cos(betaS);sin(betaS)],"vector")*dqB - deBJ;

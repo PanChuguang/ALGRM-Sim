@@ -12,12 +12,12 @@ function C = consTranMat2D(locPV,type)
     %                         coordinates
 
     arguments (Input)
-        locPV (2,:) {mustBeNumeric}
+        locPV (2,:) {mustBeNumeric,mustBeFinite,mustBeNonNan}
         type {mustBeMember(type,["point","vector"])}="point"
     end
     
     arguments (Output)
-        C (2,4,:) {mustBeNumeric}
+        C (2,4,:) {mustBeNumeric,mustBeFinite,mustBeNonNan}
     end
     
     % batch points processing
